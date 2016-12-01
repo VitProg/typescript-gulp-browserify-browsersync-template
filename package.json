@@ -6,15 +6,16 @@
   "author": "vitprog@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^2.0.10",
+    "babelify": "^7.3.0",
+    "browser-sync": "^2.18.2",
+    "browserify": "^13.1.1",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-sourcemaps": "^1.9.1",
     "run-sequence": "^1.2.2",
-    "browserify": "^13.1.1",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
     "tsify": "^2.0.3",
-    "browser-sync": "^2.18.2"
+    "typescript": "^2.0.10",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
