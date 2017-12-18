@@ -7,5 +7,5 @@ function hello(compiler: string) {
 }
 
 setTimeout(() => {
-    hello("TypeScript");
+    hello("TypeScript!");
 }, 1000);

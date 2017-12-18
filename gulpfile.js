@@ -12,6 +12,7 @@ let buffer = require('vinyl-buffer');
 let browserSync = require('browser-sync').create();
 // let tslint = require("gulp-tslint");
 let KarmaServer = require('karma').Server;
+let sass = require('gulp-sass');
 let fs = require('fs');
 
 /**********************/
@@ -27,14 +28,15 @@ let config = {
         dist:      'dist',
         temp:      'temp',
         sourceMap: './',
-        source:    'source',
+        source:    'src',
         ts:        'ts',
+        styles:    'styles',
         tests:     'tests',
     },
     browserify: {
         entries: [
             'node_modules/babel-polyfill/dist/' + (isProd ? 'polyfill.min.js' : 'polyfill.js'),
-            'source/ts/app.ts',
+            'src/ts/app.ts',
         ],
     },
     babelify:   {},
@@ -79,7 +81,7 @@ gulp.task("copy-files", function () {
 
 // todo TSLint
 // gulp.task("tslint", () =>
-//     gulp.src("source.ts")
+//     gulp.src("src.ts")
 //         .pipe(tslint({
 //                          formatter: "verbose"
 //                      }))
@@ -235,10 +237,36 @@ gulp.task('browser-sync-reload', function (done) {
     }, 500);
 });
 
+// run sass compiler
+gulp.task('sass', function () {
+    let t = gulp.src(`${config.paths.source}/${config.paths.styles}/**/*.scss`);
+
+    if (isDev) {
+        t.pipe(sourcemaps.init());
+    }
+
+    t = t.pipe(sass({outputStyle: isProd ? 'compressed' : 'nested'}).on('error', gutil.log.bind(gutil, 'sass error')));//sass.logError
+
+    if (isDev) {
+        t.pipe(sourcemaps.write());
+    }
+
+    t.pipe(gulp.dest(`./${config.paths.dist}/css`));
+
+    return t;
+});
+
+gulp.task('sass-watch', ['sass'], function (done) {
+    // gulp.watch(`${config.paths.source}/${config.paths.styles}/**/*.scss`, ['sass']);
+    browserSync.reload();
+    done();
+});
+
+//-----------------------------------//
 
 // build task
 gulp.task("build", function (cb) {
-    runSequence('clean', ['copy-files', 'babelify'], cb);
+    runSequence('clean', ['copy-files', 'babelify', 'sass'], cb);
 });
 
 // build task
@@ -255,6 +283,7 @@ gulp.task('server', ['build'], function (done) {
 // run server and watch changes and reload
 gulp.task('watch', ['server'], function () {
     gulp.watch(`${config.paths.source}/${config.paths.ts}/**/*.ts`, ['babelify-watch']);
+    gulp.watch(`${config.paths.source}/${config.paths.styles}/**/*.scss`, ['sass-watch']);
     gulp.watch(`${config.paths.source}/*.html`).on("change", function () {
         runSequence('copy-files', ['browser-sync-reload'])
     });
@@ -263,7 +292,6 @@ gulp.task('watch', ['server'], function () {
 
 // default task -> build
 gulp.task('default', ['build']);
-
 
 // Run test once and exit
 gulp.task('test', ['build-test'], function (done) {
